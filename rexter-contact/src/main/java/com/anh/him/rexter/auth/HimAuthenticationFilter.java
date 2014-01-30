@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -55,8 +57,10 @@ import com.tinkerpop.rexster.protocol.server.RexProRequest;
  */
 public class HimAuthenticationFilter extends AbstractSecurityFilter implements
 		ContainerRequestFilter {
+	private static final int VERIFY_TIME_GAP = 2*60*1000;
 	private static final Logger logger = Logger
 			.getLogger(AbstractSecurityFilter.class);
+	private static TimeZone COMMTIMEZONE=TimeZone.getTimeZone("IST");
 
 	@Context
 	protected UriInfo uriInfo;
@@ -76,7 +80,7 @@ public class HimAuthenticationFilter extends AbstractSecurityFilter implements
 
 	private static String authUrl;
 
-	private static long expirationTime = 2 * 60 * 1000;
+	private static long expirationTime = VERIFY_TIME_GAP;
 	private static SortedSet<String> ignorePaths = new TreeSet<String>();
 
 	public HimAuthenticationFilter() {
@@ -114,8 +118,9 @@ public class HimAuthenticationFilter extends AbstractSecurityFilter implements
 		}
 		Long currentMilis = new Long(svrTime);
 		long currSrvTime = System.currentTimeMillis();
+		long timeDiff = currSrvTime-currentMilis;
 
-		if ((currentMilis) > (currSrvTime + expirationTime)) {
+		if (timeDiff>expirationTime) {
 			return false;
 		}
 		try {
@@ -136,6 +141,27 @@ public class HimAuthenticationFilter extends AbstractSecurityFilter implements
 			return hexString.toString().equals(secureToken);
 		} catch (NoSuchAlgorithmException e) {
 			return false;
+		}
+	}
+	
+	public static String md5(byte[] data){
+		
+		try {
+			StringBuffer hexString = new StringBuffer();
+			byte[] hash = MessageDigest.getInstance("MD5").digest(data);
+
+			for (int i = 0; i < hash.length; i++) {
+				if ((0xff & hash[i]) < 0x10) {
+					hexString.append("0"
+							+ Integer.toHexString((0xFF & hash[i])));
+				} else {
+					hexString.append(Integer.toHexString(0xFF & hash[i]));
+				}
+			}
+
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			return null;
 		}
 	}
 
@@ -394,11 +420,26 @@ public class HimAuthenticationFilter extends AbstractSecurityFilter implements
 		}
 		if (s2s != null) {
 			String data[] = new String(Base64.base64Decode(s2s)).split(":");
-			if (data == null || data.length != 2) {
+			if (data == null || data.length != 3) {
 				throw new WebApplicationException(
 						generateErrorResponse("Authentication credentials are required."));
 			}
-			return new User(true, s2s);
+			long currentTime =  System.currentTimeMillis();
+			long tokenTime = new Long(data[0]).longValue();
+			long timeDiff = (currentTime-tokenTime);
+			if(timeDiff>VERIFY_TIME_GAP || timeDiff<0 ){
+				throw new WebApplicationException(
+						generateErrorResponse("Authentication credentials are required."));
+			}
+			long encoding = Long.parseLong(data[0].substring(data[0].length()-5));
+			String square = ""+(encoding*encoding);
+			String myPassword = this.users.get(data[1]);
+			String secToken = HimAuthenticationFilter.md5((square.substring(0,5)+myPassword+square.substring(5)).getBytes());
+			if(!secToken.equals(data[2])){
+				throw new WebApplicationException(
+						generateErrorResponse("Authentication credentials are required."));
+			}
+			return new User(true, data[1]);
 		}
 		return null;
 	}
