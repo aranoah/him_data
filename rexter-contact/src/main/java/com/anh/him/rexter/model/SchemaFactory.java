@@ -20,6 +20,7 @@ public class SchemaFactory {
 	public static final int CURR_VERSION = 1;
 	public static final String E_LOCATON_EDGE = "locatedIn";
 	public static final String E_BUSINESS_LOC_EDGE = "linkAt";
+	private static final String E_FEEDS = "feed";
 
 	// public static final String E_BUSINESS_TYPE_EDGE="linkAt";
 
@@ -28,8 +29,7 @@ public class SchemaFactory {
 		case 1: {
 
 			// USER NODE
-			graph.makeKey("__id").dataType(String.class)
-					.indexed(Vertex.class)
+			graph.makeKey("__id").dataType(String.class).indexed(Vertex.class)
 					.unique().make();
 			graph.makeKey("type").dataType(String.class).make();
 			graph.makeKey("photoUrl").dataType(String.class).make();
@@ -57,13 +57,15 @@ public class SchemaFactory {
 			TitanKey profile = graph.makeKey("profile").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
 			TitanKey pincode = graph.makeKey("pincode").dataType(Integer.class)
-					.indexed(AbstractExtension.INDEX_NAME, Element.class)
-					.make();
+					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
 			TitanKey loc = graph.makeKey("loc").dataType(Geoshape.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
-			TitanKey btype = graph.makeKey("btype").dataType(Integer.class)
+			// this should be identify what kind of edge this is //label
+			TitanKey btype = graph.makeKey("btype").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
-			TitanKey cid = graph.makeKey("cid").dataType(Integer.class)
+			TitanKey cid = graph.makeKey("oid").dataType(String.class)
+					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
+			TitanKey label = graph.makeKey("label").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
 
 			TitanKey etags = graph
@@ -77,14 +79,18 @@ public class SchemaFactory {
 					.make();
 
 			// label declaration
-			graph.makeLabel(E_BUSINESS_LOC_EDGE).signature(btype, pincode)
+			graph.makeLabel(E_BUSINESS_LOC_EDGE)
+					.signature(label, btype, pincode)
 					.sortKey(rating, likes, followers).oneToMany().make();
 
-			graph.makeLabel(E_LOCATON_EDGE).signature(profile, pincode)
+			graph.makeLabel(E_LOCATON_EDGE).signature(label, profile, pincode)
 					.sortKey(rating, likes, followers).oneToMany().make();
 
-			graph.makeLabel(E_FRIEND_OF).signature(fndship).manyToMany().make();
-			graph.makeLabel(E_FOLLOWS).manyToMany().make();
+			graph.makeLabel(E_FRIEND_OF).signature(label, fndship).manyToMany()
+					.make();
+			graph.makeLabel(E_FOLLOWS).signature(label).manyToMany().make();
+			graph.makeLabel(E_FEEDS).signature(label)
+					.sortKey(rating, likes, followers).manyToMany().make();
 			// Location or visiting place
 			graph.makeKey("caddress").dataType(String.class).make();
 			graph.makeKey("carea").dataType(String.class).make();
@@ -100,8 +106,12 @@ public class SchemaFactory {
 					.make();
 			TitanKey __cid = graph.makeKey("__cid").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Vertex.class).make();
-			StandardKeyMaker l;
-			graph.commit();
+           //SEvent node
+			graph.makeKey("sdate").dataType(Date.class).make();
+			graph.makeKey("edate").dataType(Date.class).make();
+			
+			
+	  		graph.commit();
 		}
 			break;
 		default:

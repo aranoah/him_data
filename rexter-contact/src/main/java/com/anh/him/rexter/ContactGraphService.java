@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -16,6 +17,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.anh.him.rexter.auth.HimAuthenticationFilter;
@@ -28,6 +30,8 @@ import com.anh.him.rexter.model.SUserNode;
 import com.anh.him.rexter.model.SchemaFactory;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.TitanIndexQuery.Result;
+import com.thinkaurelius.titan.core.TitanKey;
+import com.thinkaurelius.titan.core.TitanType;
 import com.thinkaurelius.titan.core.TitanVertex;
 import com.thinkaurelius.titan.core.attribute.Geoshape;
 import com.thinkaurelius.titan.diskstorage.StorageException;
@@ -119,6 +123,53 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 		}
 		if (schema)
 			SchemaFactory.createIndex(graph, 1);
+		return response.prepare();
+	}
+
+	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "indexes", produces = "application/json")
+	@ExtensionDescriptor(description = "getIndex definition")
+	public ExtensionResponse getIndexes(
+			@ExtensionRequestParameter(name = "version") Integer version,
+			@RexsterContext SecurityContext securityContext,
+			@RexsterContext Graph g, @RexsterContext HttpServletRequest request)
+			throws Exception {
+
+		ControllerResponse response = new ControllerResponse();
+		TitanGraph graph = (TitanGraph) g;
+		Set<String> indexedKeys = graph.getIndexedKeys(Vertex.class);
+		TitanType t = null;
+		String key = null;
+		JSONObject vertexIndexes = new JSONObject();
+		for (String s : indexedKeys) {
+			t = graph.getType(s);
+			key = LongEncoding.encode((Long) t.getId());
+			vertexIndexes.put(t.getName(), key);
+		}
+		Set<String> indexedEdgeKeys = graph.getIndexedKeys(Edge.class);
+		JSONObject edgeIndexes = new JSONObject();
+		for (String s : indexedKeys) {
+			t = graph.getType(s);
+			key = LongEncoding.encode((Long) t.getId());
+			edgeIndexes.put(t.getName(), key);
+		}
+		JSONObject result = new JSONObject();
+		result.put("vertex", vertexIndexes);
+		result.put("edge", edgeIndexes);
+		response.setDbResult(result);
+		Iterator<TitanKey> iter = graph.getTypes(TitanKey.class).iterator();
+		TitanKey tk = null;
+		JSONObject allKeys = new JSONObject();
+		while (iter.hasNext()) {
+			tk = iter.next();
+			try {
+				key = LongEncoding.encode((Long) tk.getId());
+			} catch (Exception e) {
+				key = tk.getName();
+			}
+		
+			allKeys.put(tk.getName(), key);
+		}
+		result.put("allkeys", allKeys);
 		return response.prepare();
 	}
 
@@ -731,7 +782,7 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 		return response.prepare();
 	}
 
-	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH,method = HttpMethod.POST, path = "init-address")
+	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "init-address")
 	@ExtensionDescriptor(description = "index address")
 	public ExtensionResponse indexState(
 			@RexsterContext SecurityContext securityContext,
@@ -750,7 +801,7 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 		String state = null;
 		String country = null;
 		JSONArray array = null;
-		
+
 		try {
 			JSONArray json = new JSONArray(jsonData);
 			for (int i = 0; i < json.length(); i++) {

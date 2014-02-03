@@ -21,6 +21,7 @@ public interface AbstractExtension {
 	public static final int EXPIRATION_TIME = 24 * 3600 * 1000;
 	public static String INDEX_NAME = "search";
 	public static final HashMap<String, EnumNodeType> nodes = new HashMap<String, AbstractExtension.EnumNodeType>();
+	public static final int DEPLOYMENT_VERSION=1;
 
 	enum EnumNodeType {
 		USER("user"), PLACE("place"), GROUP("group"), BUSINESS("business"),EVENT("event"),;
