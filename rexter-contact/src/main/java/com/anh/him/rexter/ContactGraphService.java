@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -17,7 +16,6 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.anh.him.rexter.auth.HimAuthenticationFilter;
@@ -31,7 +29,7 @@ import com.anh.him.rexter.model.SchemaFactory;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.TitanIndexQuery.Result;
 import com.thinkaurelius.titan.core.TitanKey;
-import com.thinkaurelius.titan.core.TitanType;
+import com.thinkaurelius.titan.core.TitanLabel;
 import com.thinkaurelius.titan.core.TitanVertex;
 import com.thinkaurelius.titan.core.attribute.Geoshape;
 import com.thinkaurelius.titan.diskstorage.StorageException;
@@ -136,29 +134,23 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 
 		ControllerResponse response = new ControllerResponse();
 		TitanGraph graph = (TitanGraph) g;
-		Set<String> indexedKeys = graph.getIndexedKeys(Vertex.class);
-		TitanType t = null;
-		String key = null;
-		JSONObject vertexIndexes = new JSONObject();
-		for (String s : indexedKeys) {
-			t = graph.getType(s);
-			key = LongEncoding.encode((Long) t.getId());
-			vertexIndexes.put(t.getName(), key);
-		}
-		Set<String> indexedEdgeKeys = graph.getIndexedKeys(Edge.class);
-		JSONObject edgeIndexes = new JSONObject();
-		for (String s : indexedKeys) {
-			t = graph.getType(s);
-			key = LongEncoding.encode((Long) t.getId());
-			edgeIndexes.put(t.getName(), key);
+
+		Iterator<TitanLabel> labels = graph.getTypes(TitanLabel.class)
+				.iterator();
+		JSONArray larrays = new JSONArray();
+		TitanLabel ll = null;
+		while (labels.hasNext()) {
+			;
+			ll = labels.next();
+			larrays.put(ll.getName());
 		}
 		JSONObject result = new JSONObject();
-		result.put("vertex", vertexIndexes);
-		result.put("edge", edgeIndexes);
+		result.put("labels", larrays);
 		response.setDbResult(result);
 		Iterator<TitanKey> iter = graph.getTypes(TitanKey.class).iterator();
 		TitanKey tk = null;
 		JSONObject allKeys = new JSONObject();
+		String key;
 		while (iter.hasNext()) {
 			tk = iter.next();
 			try {
@@ -166,7 +158,6 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 			} catch (Exception e) {
 				key = tk.getName();
 			}
-		
 			allKeys.put(tk.getName(), key);
 		}
 		result.put("allkeys", allKeys);

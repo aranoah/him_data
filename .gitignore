@@ -4,6 +4,8 @@
 *.jar
 *.war
 *.ear
+*.class
 .classpath
 .settings
 target/
+rexter-contact/target/
