@@ -65,7 +65,7 @@ public class SchemaFactory {
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
 			TitanKey cid = graph.makeKey("oid").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
-			TitanKey label = graph.makeKey("label").dataType(String.class)
+			TitanKey label = graph.makeKey("hlabel").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
 
 			TitanKey etags = graph

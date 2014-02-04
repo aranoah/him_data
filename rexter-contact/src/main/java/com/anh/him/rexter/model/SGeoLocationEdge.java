@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thinkaurelius.titan.core.attribute.Geoshape;
 import com.tinkerpop.blueprints.Edge;
 
-public class SGeoLocatonEdge {
+public class SGeoLocationEdge {
 	private Object id;
 
 	@JsonIgnore
@@ -61,11 +61,11 @@ public class SGeoLocatonEdge {
 		this.house = house;
 	}
 
-	public SGeoLocatonEdge() {
+	public SGeoLocationEdge() {
 
 	}
 
-	public SGeoLocatonEdge(Edge e) {
+	public SGeoLocationEdge(Edge e) {
 		this.edge = e;
 		id = e.getId();
 		label = e.getLabel();

@@ -25,7 +25,7 @@ import com.anh.him.rexter.auth.HimAuthenticationFilter.AuthenticationPrincipal;
 import com.anh.him.rexter.auth.HimAuthenticationFilter.User;
 import com.anh.him.rexter.model.SFriendEdge;
 import com.anh.him.rexter.model.SFriendEdge.EnumFriendshipStatus;
-import com.anh.him.rexter.model.SGeoLocatonEdge;
+import com.anh.him.rexter.model.SGeoLocationEdge;
 import com.anh.him.rexter.model.SUserNode;
 import com.anh.him.rexter.model.SchemaFactory;
 import com.thinkaurelius.titan.core.TitanGraph;
@@ -446,7 +446,7 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 			return response.prepare();
 		}
 		response = new ControllerResponse();
-		SGeoLocatonEdge edge = new SGeoLocatonEdge();
+		SGeoLocationEdge edge = new SGeoLocationEdge();
 		edge.setLabel(SchemaFactory.E_LOCATON_EDGE);
 		edge.setCid(cid);
 		if (lo != null && lat != null) {
@@ -464,7 +464,7 @@ public class ContactGraphService extends AbstractRexsterExtension implements
 		return response.prepare();
 	}
 
-	private ControllerResponse addLocation(Vertex myV, SGeoLocatonEdge edge,
+	private ControllerResponse addLocation(Vertex myV, SGeoLocationEdge edge,
 			final TitanGraph graph) {
 		ControllerResponse response = new ControllerResponse();
 		try {
