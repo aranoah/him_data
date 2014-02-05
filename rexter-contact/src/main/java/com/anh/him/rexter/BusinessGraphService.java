@@ -56,7 +56,7 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			@ExtensionRequestParameter(name = "rating", description = "rating") Float rating,
 			@ExtensionRequestParameter(name = "followers", description = "followers") Long followers,
 			@ExtensionRequestParameter(name = "ver", description = "ver") String ver,
-			@ExtensionRequestParameter(name = "tags", description = "tags") String[] tags,
+			@ExtensionRequestParameter(name = "tags", description = "tags") String tags,
 			@ExtensionRequestParameter(name = "address", description = "address") String address,
 			@ExtensionRequestParameter(name = "likes", description = "likes") Long likes,
 			@ExtensionRequestParameter(name = "lon", description = "longitude") Float lon,
@@ -83,6 +83,7 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			meV = meIter.next();
 		}
 		meV.setProperty(HIMGraphConstant.ID, serviceId);
+
 		if (null != serviceName)
 			meV.setProperty(HIMGraphConstant.NAME, serviceName);
 		if (null != tags)
@@ -150,7 +151,7 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 						.toString());
 			edge.setDoj(new java.util.Date());
 			if (null != tags)
-				edge.setEtags(Arrays.asList(tags));
+				edge.setEtags(tags);
 			if (null != serviceName)
 				edge.setName(serviceName);
 			if (null != pincode)
@@ -168,6 +169,8 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 				edge.setLikes(likes);
 			if (null != address)
 				edge.setHouse(address);
+			if (null != bType)
+				edge.setBtype(bType);
 			if (null != lat && null != lon) {
 				if (Geoshape.isValidCoordinate(lat, lon))
 					edge.setLoc(Geoshape.point(lat, lon));

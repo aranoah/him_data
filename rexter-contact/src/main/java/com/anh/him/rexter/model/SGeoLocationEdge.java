@@ -1,9 +1,8 @@
 package com.anh.him.rexter.model;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
+import com.anh.him.rexter.util.HIMGraphConstant;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thinkaurelius.titan.core.attribute.Geoshape;
 import com.tinkerpop.blueprints.Edge;
@@ -18,7 +17,7 @@ public class SGeoLocationEdge {
 	private Date doj;
 	private Float rating;
 	private Long likes;
-	private List<String> etags = new ArrayList<String>();
+	private String etags;
 	private String profile;
 	private Long followers;
 	private Geoshape loc;
@@ -30,6 +29,23 @@ public class SGeoLocationEdge {
 	private Integer pincode;
 	private String cid;
 	private String house;
+	private String btype;
+
+	/**
+	 * 
+	 * @return the btype
+	 */
+	public String getBtype() {
+		return btype;
+	}
+
+	/**
+	 * @param btype
+	 *            the btype to set
+	 */
+	public void setBtype(String btype) {
+		this.btype = btype;
+	}
 
 	/**
 	 * @return the area
@@ -85,16 +101,16 @@ public class SGeoLocationEdge {
 		this.country = e.getProperty("country");
 		this.pincode = e.getProperty("pincode");
 		this.cid = e.getProperty("cid");
+		this.btype = e.getProperty("btype");
 	}
 
 	public void prepare() {
-		this.edge.setProperty("doj", doj);
 		if (rating != null)
 			this.edge.setProperty("rating", rating);
 		if (likes != null)
 			this.edge.setProperty("likes", likes);
 		if (etags != null)
-			this.edge.setProperty("tags", etags);
+			this.edge.setProperty("etags", etags);
 		if (profile != null)
 			this.edge.setProperty("profile", profile);
 		if (followers != null)
@@ -105,10 +121,14 @@ public class SGeoLocationEdge {
 			this.edge.setProperty("area", area);
 		if (house != null)
 			this.edge.setProperty("house", house);
-		this.edge.setProperty("status", status);
+		if (status != null)
+			this.edge.setProperty("status", status);
 		if (cid != null)
 			this.edge.setProperty("cid", cid);
-		this.edge.setProperty("name", name);
+		if (name != null)
+			this.edge.setProperty("name", name);
+		if (doj != null)
+			this.edge.setProperty("doj", doj);
 		if (city != null)
 			this.edge.setProperty("city", city);
 		if (state != null)
@@ -117,7 +137,8 @@ public class SGeoLocationEdge {
 			this.edge.setProperty("country", country);
 		if (pincode != null)
 			this.edge.setProperty("pincode", pincode);
-
+		if (btype != null)
+			this.edge.setProperty("btype", btype);
 	}
 
 	/**
@@ -213,7 +234,7 @@ public class SGeoLocationEdge {
 	/**
 	 * @return the etags
 	 */
-	public List<String> getEtags() {
+	public String getEtags() {
 		return etags;
 	}
 
@@ -221,22 +242,8 @@ public class SGeoLocationEdge {
 	 * @param etags
 	 *            the etags to set
 	 */
-	public void setEtags(List<String> etags) {
+	public void setEtags(String etags) {
 		this.etags = etags;
-	}
-
-	/**
-	 * @param etags
-	 *            the etags to set '|' separated tags
-	 */
-	public void setEtags(String etag) {
-		if (etag == null) {
-			return;
-		}
-		String[] es = etag.split("|");
-		for (String s : es) {
-			this.etags.add(s);
-		}
 	}
 
 	/**
