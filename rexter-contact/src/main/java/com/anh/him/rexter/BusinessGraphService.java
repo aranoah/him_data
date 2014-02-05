@@ -1,7 +1,6 @@
 package com.anh.him.rexter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -186,4 +185,131 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 		}
 		return response.prepare();
 	}
+
+	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "update", produces = "application/json")
+	@ExtensionDescriptor(description = "register or update business")
+	public ExtensionResponse updateBusiness(
+			@RexsterContext SecurityContext securityContext,
+			@RexsterContext Graph g,
+			@RexsterContext HttpServletRequest request,
+			@ExtensionRequestParameter(name = "serviceId", description = "service id") String serviceId,
+			@ExtensionRequestParameter(name = "serviceName", description = "service name") String serviceName,
+			@ExtensionRequestParameter(name = "btype", description = "business type") String bType,
+			@ExtensionRequestParameter(name = "bcategory", description = "business category") String bCategory,
+			@ExtensionRequestParameter(name = "status", description = "status") Integer status,
+			@ExtensionRequestParameter(name = "rating", description = "rating") Float rating,
+			@ExtensionRequestParameter(name = "followers", description = "followers") Long followers,
+			@ExtensionRequestParameter(name = "tags", description = "tags") String tags,
+			@ExtensionRequestParameter(name = "likes", description = "likes") Long likes) {
+		ControllerResponse response = new ControllerResponse();
+		TitanGraph graph = (TitanGraph) g;
+		/*
+		 * response = HimAuthenticationFilter.isAdminUser(null,
+		 * securityContext); if (response != null) { return response.prepare();
+		 * } else { response = new ControllerResponse(); }
+		 */
+		if (null == serviceId) {
+			response.setMessage(HIMGraphMessageConstant.MISSING_SERVICE);
+			response.setStatus(BAD_INPUT);
+			logger.error(HIMGraphMessageConstant.MISSING_SERVICE);
+			return response.prepare();
+		}
+		Iterator<Vertex> meIter = graph.getVertices(HIMGraphConstant.ID,
+				serviceId).iterator();
+		Vertex meV = meIter.next();
+		if (meV == null) {
+			response.setMessage(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+			response.setStatus(BAD_INPUT);
+			logger.error(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+			return response.prepare();
+		}
+
+		if (null != serviceName)
+			meV.setProperty(HIMGraphConstant.NAME, serviceName);
+		if (null != tags)
+			meV.setProperty(HIMGraphConstant.TAGS, tags);
+		if (null != bType)
+			meV.setProperty(HIMGraphConstant.BTYPE, bType);
+		if (null != bCategory)
+			meV.setProperty(HIMGraphConstant.BCATEGORY, bCategory);
+		if (null != serviceId)
+			meV.setProperty(HIMGraphConstant.SERVICE_ID, serviceId);
+		if (null != serviceName)
+			meV.setProperty(HIMGraphConstant.SERVICE_NAME, serviceName);
+		if (null != status)
+			meV.setProperty(HIMGraphConstant.STATUS, status);
+		meV.setProperty(HIMGraphConstant.DATE_OF_JOINING, new Date());
+		meV.setProperty(HIMGraphConstant.VERSION, System.currentTimeMillis());
+		if (null != rating)
+			meV.setProperty(HIMGraphConstant.RATING, rating);
+		if (null != followers)
+			meV.setProperty(HIMGraphConstant.FOLLOWERS, followers);
+
+		SGeoLocationEdge edge = null;
+		try {
+			List vinfo = new ArrayList();
+			edge = new SGeoLocationEdge();
+			Iterator<Vertex> es = graph.query()
+					.has(HIMGraphConstant.ID, serviceId).limit(1).vertices()
+					.iterator();
+			Vertex loc = null;
+			if (es.hasNext()) {
+				loc = es.next();
+				vinfo.add(loc);
+			}
+			if (loc == null) {
+				// throw error
+				response.setMessage(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+				response.setStatus(BAD_INPUT);
+				logger.error(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+				return response.prepare();
+			}
+			TitanEdge e = null;
+			try {
+				GremlinPipeline pipe = new GremlinPipeline();
+				Iterator iter = pipe.start(meV)
+						.bothE(SchemaFactory.E_BUSINESS_LOC_EDGE).as("e")
+						.bothV().retain(vinfo).back("e").iterator();
+				if (iter.hasNext()) {
+					e = (TitanEdge) iter.next();
+				}
+				if (e == null) {
+					// throw error
+					response.setMessage(HIMGraphMessageConstant.RELATION_NOT_EXIST);
+					response.setStatus(BAD_INPUT);
+					logger.error(HIMGraphMessageConstant.RELATION_NOT_EXIST);
+					return response.prepare();
+				}
+
+			} catch (Exception exp) {
+				logger.error(HIMGraphMessageConstant.EDGE_EXISTS);
+			}
+
+			edge.setEdge(e);
+			if (null != tags)
+				edge.setEtags(tags);
+			if (null != serviceName)
+				edge.setName(serviceName);
+			if (null != followers)
+				edge.setFollowers(followers);
+			if (null != rating)
+				edge.setRating(rating);
+			if (null != status)
+				edge.setStatus(status);
+			if (null != likes)
+				edge.setLikes(likes);
+			if (null != bType)
+				edge.setBtype(bType);
+			edge.prepare();
+			response.setDbResult(e);
+		} catch (Exception e) {
+			logger.error(HIMGraphMessageConstant.UNKNOWN_ERROR + " : "
+					+ e.getMessage());
+			response.setMessage(HIMGraphMessageConstant.UNKNOWN_ERROR);
+			response.setStatus(BAD_INPUT);
+			return response.prepare();
+		}
+		return response.prepare();
+	}
+
 }
