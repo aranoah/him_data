@@ -152,6 +152,7 @@ public class EventGraphService extends AbstractRexsterExtension implements
 			}
 
 			edge.setEdge(e);
+			edge.setId(eventCode);
 			if (null != city)
 				edge.setCity(city);
 			if (null != loc.getProperty(HIMGraphConstant.COUNTRY))

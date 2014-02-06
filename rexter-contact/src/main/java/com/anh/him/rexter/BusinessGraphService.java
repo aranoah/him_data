@@ -139,6 +139,7 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			}
 
 			edge.setEdge(e);
+			edge.setId(serviceId);
 			if (area != null)
 				edge.setArea(area);
 			if (null != loc.getProperty(HIMGraphConstant.CID))
