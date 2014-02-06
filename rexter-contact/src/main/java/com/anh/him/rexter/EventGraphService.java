@@ -52,6 +52,8 @@ public class EventGraphService extends AbstractRexsterExtension implements
 			@ExtensionRequestParameter(name = "eventCategory", description = "event category") String eventCategory,
 			@ExtensionRequestParameter(name = "startDate", description = "event start date") String startDate,
 			@ExtensionRequestParameter(name = "endDate", description = "event end date") String endDate,
+			@ExtensionRequestParameter(name = "startTime", description = "event start time") String startTime,
+			@ExtensionRequestParameter(name = "endTime", description = "event end time") String endTime,
 
 			@ExtensionRequestParameter(name = "street", description = "street") String street,
 			@ExtensionRequestParameter(name = "city", description = "city") String city,
@@ -94,6 +96,22 @@ public class EventGraphService extends AbstractRexsterExtension implements
 		if (null != eventCategory)
 			eventVertex.setProperty(HIMGraphConstant.EVENT_CATEGORY,
 					eventCategory);
+		if (null != street)
+			eventVertex.setProperty(HIMGraphConstant.STREET, street);
+		if (null != city)
+			eventVertex.setProperty(HIMGraphConstant.CITY, city);
+		if (null != pincode)
+			eventVertex.setProperty(HIMGraphConstant.PINCODE, pincode);
+		if (null != country)
+			eventVertex.setProperty(HIMGraphConstant.COUNTRY, country);
+		if (null != startDate)
+			eventVertex.setProperty(HIMGraphConstant.START_DATE, startDate);
+		if (null != endDate)
+			eventVertex.setProperty(HIMGraphConstant.END_DATE, endDate);
+		if (null != startTime)
+			eventVertex.setProperty(HIMGraphConstant.START_TIME, startTime);
+		if (null != endTime)
+			eventVertex.setProperty(HIMGraphConstant.END_TIME, endTime);
 
 		eventVertex.setProperty(HIMGraphConstant.DATE_OF_JOINING, new Date());
 		eventVertex.setProperty(HIMGraphConstant.VERSION,
@@ -167,15 +185,12 @@ public class EventGraphService extends AbstractRexsterExtension implements
 
 	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "update", produces = "application/json")
 	@ExtensionDescriptor(description = "register or update business")
-	public ExtensionResponse updateBusiness(
+	public ExtensionResponse lightUpdate(
 			@RexsterContext SecurityContext securityContext,
 			@RexsterContext Graph g,
 			@RexsterContext HttpServletRequest request,
 			@ExtensionRequestParameter(name = "eventCode", description = "event Code") String eventCode,
 			@ExtensionRequestParameter(name = "himId", description = "him Id") String himId,
-			@ExtensionRequestParameter(name = "eventName", description = "event name") String eventName,
-			@ExtensionRequestParameter(name = "eventType", description = "event type") String eventType,
-			@ExtensionRequestParameter(name = "eventCategory", description = "event category") String eventCategory,
 			@ExtensionRequestParameter(name = "status", description = "status") Integer status,
 			@ExtensionRequestParameter(name = "rating", description = "rating") Float rating,
 			@ExtensionRequestParameter(name = "followers", description = "followers") Long followers,
@@ -204,14 +219,8 @@ public class EventGraphService extends AbstractRexsterExtension implements
 			return response.prepare();
 		}
 
-		if (null != eventName)
-			meV.setProperty(HIMGraphConstant.NAME, eventName);
 		if (null != tags)
 			meV.setProperty(HIMGraphConstant.TAGS, tags);
-		if (null != eventType)
-			meV.setProperty(HIMGraphConstant.EVENT_TYPE, eventType);
-		if (null != eventCategory)
-			meV.setProperty(HIMGraphConstant.EVENT_CATEGORY, eventCategory);
 		if (null != status)
 			meV.setProperty(HIMGraphConstant.STATUS, status);
 		meV.setProperty(HIMGraphConstant.DATE_OF_JOINING, new Date());
@@ -262,8 +271,6 @@ public class EventGraphService extends AbstractRexsterExtension implements
 			edge.setEdge(e);
 			if (null != tags)
 				edge.setEtags(tags);
-			if (null != eventName)
-				edge.setName(eventName);
 			if (null != followers)
 				edge.setFollowers(followers);
 			if (null != rating)
@@ -272,8 +279,6 @@ public class EventGraphService extends AbstractRexsterExtension implements
 				edge.setStatus(status);
 			if (null != likes)
 				edge.setLikes(likes);
-			if (null != eventType)
-				edge.setBtype(eventType);
 			edge.prepare();
 			response.setDbResult(e);
 		} catch (Exception e) {
@@ -285,5 +290,4 @@ public class EventGraphService extends AbstractRexsterExtension implements
 		}
 		return response.prepare();
 	}
-
 }

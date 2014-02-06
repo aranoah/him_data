@@ -34,6 +34,10 @@ public class HIMGraphConstant {
 	public static String EVENT_TYPE = "eventType"; // EVENT TYPE
 	public static String EVENT_CATEGORY = "eventCategory"; // EVENT CATEGORY	
 	public static String STOREID = "storeId"; // STOREID
-	public static String HIM_ID = "himId";
-	
+	public static String HIM_ID = "himId"; //HEREIAM ID
+	public static String STREET = "street"; // STREET
+	public static String START_DATE = "startDate"; //START DATE
+	public static String END_DATE = "endDate"; // END DATE
+	public static String START_TIME = "startTime"; //START TIME
+	public static String END_TIME = "endTime"; //END TIME
 }
