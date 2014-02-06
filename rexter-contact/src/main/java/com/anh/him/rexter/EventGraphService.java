@@ -30,34 +30,33 @@ import com.tinkerpop.rexster.extension.ExtensionResponse;
 import com.tinkerpop.rexster.extension.HttpMethod;
 import com.tinkerpop.rexster.extension.RexsterContext;
 
-@ExtensionNaming(namespace = AbstractExtension.EXTENSION_NAMESPACE, name = BusinessGraphService.EXTENSION_NAME)
-public class BusinessGraphService extends AbstractRexsterExtension implements
+@ExtensionNaming(namespace = AbstractExtension.EXTENSION_NAMESPACE, name = EventGraphService.EXTENSION_NAME)
+public class EventGraphService extends AbstractRexsterExtension implements
 		AbstractExtension {
-	public static final String EXTENSION_NAME = "circle";
-	private static Logger logger = Logger.getLogger(BusinessGraphService.class);
+	public static final String EXTENSION_NAME = "event";
+	private static Logger logger = Logger.getLogger(EventGraphService.class);
 
-	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "registerOrUpdate", produces = "application/json")
-	@ExtensionDescriptor(description = "register or update business")
-	public ExtensionResponse registerOrUpdateBusiness(
+	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "createOrUpdate", produces = "application/json")
+	@ExtensionDescriptor(description = "register or update an event")
+	public ExtensionResponse createOrUpdateEvent(
 			@RexsterContext SecurityContext securityContext,
 			@RexsterContext Graph g,
 			@RexsterContext HttpServletRequest request,
-			@ExtensionRequestParameter(name = "serviceId", description = "service id") String serviceId,
-			@ExtensionRequestParameter(name = "serviceName", description = "service name") String serviceName,
-			@ExtensionRequestParameter(name = "btype", description = "business type") String bType,
-			@ExtensionRequestParameter(name = "bcategory", description = "business category") String bCategory,
-			@ExtensionRequestParameter(name = "pincode", description = "pincode") Integer pincode,
-			@ExtensionRequestParameter(name = "state", description = "state") String state,
+			@ExtensionRequestParameter(name = "eventCode", description = "event Code") String eventCode,
+			@ExtensionRequestParameter(name = "himId", description = "HIM registration Id") String himId,
+			@ExtensionRequestParameter(name = "himType", description = "store or user") String himType,
+
+			@ExtensionRequestParameter(name = "eventName", description = "event name") String eventName,
+			@ExtensionRequestParameter(name = "eventType", description = "event type") String eventType,
+			@ExtensionRequestParameter(name = "tags", description = "event tags") String tags,
+			@ExtensionRequestParameter(name = "eventCategory", description = "event category") String eventCategory,
+			@ExtensionRequestParameter(name = "startDate", description = "event start date") String startDate,
+			@ExtensionRequestParameter(name = "endDate", description = "event end date") String endDate,
+
+			@ExtensionRequestParameter(name = "street", description = "street") String street,
 			@ExtensionRequestParameter(name = "city", description = "city") String city,
-			@ExtensionRequestParameter(name = "area", description = "area") String area,
-			@ExtensionRequestParameter(name = "doj", description = "doj") Integer doj,
-			@ExtensionRequestParameter(name = "status", description = "status") Integer status,
-			@ExtensionRequestParameter(name = "rating", description = "rating") Float rating,
-			@ExtensionRequestParameter(name = "followers", description = "followers") Long followers,
-			@ExtensionRequestParameter(name = "ver", description = "ver") String ver,
-			@ExtensionRequestParameter(name = "tags", description = "tags") String tags,
-			@ExtensionRequestParameter(name = "address", description = "address") String address,
-			@ExtensionRequestParameter(name = "likes", description = "likes") Long likes,
+			@ExtensionRequestParameter(name = "pincode", description = "pincode") Integer pincode,
+			@ExtensionRequestParameter(name = "country", description = "country") String country,
 			@ExtensionRequestParameter(name = "lon", description = "longitude") Float lon,
 			@ExtensionRequestParameter(name = "lat", description = "latitude") Float lat) {
 		ControllerResponse response = new ControllerResponse();
@@ -67,48 +66,44 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 		 * securityContext); if (response != null) { return response.prepare();
 		 * } else { response = new ControllerResponse(); }
 		 */
-		if (null == serviceId) {
+		if (null == eventCode) {
 			response.setMessage(HIMGraphMessageConstant.MISSING_SERVICE);
 			response.setStatus(BAD_INPUT);
 			logger.error(HIMGraphMessageConstant.MISSING_SERVICE);
 			return response.prepare();
 		}
-		Iterator<Vertex> meIter = graph.getVertices(HIMGraphConstant.ID,
-				serviceId).iterator();
-		Vertex meV = null;
-		if (!meIter.hasNext()) {
-			meV = graph.addVertex(null);
+		Iterator<Vertex> event = graph.getVertices(HIMGraphConstant.ID,
+				eventCode).iterator();
+		Vertex eventVertex = null;
+		if (!event.hasNext()) {
+			eventVertex = graph.addVertex(null);
 		} else {
-			meV = meIter.next();
+			eventVertex = event.next();
 		}
-		meV.setProperty(HIMGraphConstant.ID, serviceId);
+		eventVertex.setProperty(HIMGraphConstant.EVENT_CODE, eventCode);
+		eventVertex.setProperty(HIMGraphConstant.ID, eventCode);
+		eventVertex.setProperty(HIMGraphConstant.HIM_ID, himId);
+		eventVertex.setProperty(HIMGraphConstant.BTYPE, himType);
 
-		if (null != serviceName)
-			meV.setProperty(HIMGraphConstant.NAME, serviceName);
+		if (null != eventName)
+			eventVertex.setProperty(HIMGraphConstant.NAME, eventName);
 		if (null != tags)
-			meV.setProperty(HIMGraphConstant.TAGS, tags);
-		if (null != bType)
-			meV.setProperty(HIMGraphConstant.BTYPE, bType);
-		if (null != bCategory)
-			meV.setProperty(HIMGraphConstant.BCATEGORY, bCategory);
-		if (null != serviceId)
-			meV.setProperty(HIMGraphConstant.SERVICE_ID, serviceId);
-		if (null != serviceName)
-			meV.setProperty(HIMGraphConstant.SERVICE_NAME, serviceName);
-		if (null != status)
-			meV.setProperty(HIMGraphConstant.STATUS, status);
-		meV.setProperty(HIMGraphConstant.DATE_OF_JOINING, new Date());
-		meV.setProperty(HIMGraphConstant.VERSION, System.currentTimeMillis());
-		if (null != rating)
-			meV.setProperty(HIMGraphConstant.RATING, rating);
-		if (null != followers)
-			meV.setProperty(HIMGraphConstant.FOLLOWERS, followers);
+			eventVertex.setProperty(HIMGraphConstant.TAGS, tags);
+		if (null != eventType)
+			eventVertex.setProperty(HIMGraphConstant.EVENT_TYPE, eventType);
+		if (null != eventCategory)
+			eventVertex.setProperty(HIMGraphConstant.EVENT_CATEGORY,
+					eventCategory);
+
+		eventVertex.setProperty(HIMGraphConstant.DATE_OF_JOINING, new Date());
+		eventVertex.setProperty(HIMGraphConstant.VERSION,
+				System.currentTimeMillis());
 
 		SGeoLocationEdge edge = null;
 		try {
 			List vinfo = new ArrayList();
 			edge = new SGeoLocationEdge();
-			Iterator<Vertex> es = graph.query().has("czone", pincode / 1000)
+			Iterator<Vertex> es = graph.query().has(HIMGraphConstant.ID, himId)
 					.limit(1).vertices().iterator();
 			Vertex loc = null;
 			if (es.hasNext()) {
@@ -117,32 +112,28 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			}
 			if (loc == null) {
 				// throw error
-				response.setMessage(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+				response.setMessage(HIMGraphMessageConstant.MISSING_STORE);
 				response.setStatus(BAD_INPUT);
-				logger.error(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+				logger.error(HIMGraphMessageConstant.MISSING_STORE);
 				return response.prepare();
 			}
 			TitanEdge e = null;
 			try {
 				GremlinPipeline pipe = new GremlinPipeline();
-				Iterator iter = pipe.start(meV)
-						.bothE(SchemaFactory.E_BUSINESS_LOC_EDGE).as("e")
-						.bothV().retain(vinfo).back("e").iterator();
+				Iterator iter = pipe.start(eventVertex)
+						.bothE(SchemaFactory.E_EVENTS).as("e").bothV()
+						.retain(vinfo).back("e").iterator();
 				if (iter.hasNext()) {
 					e = (TitanEdge) iter.next();
 				} else {
-					e = (TitanEdge) graph.addEdge(null, meV, loc,
-							SchemaFactory.E_BUSINESS_LOC_EDGE);
+					e = (TitanEdge) graph.addEdge(null, eventVertex, loc,
+							SchemaFactory.E_EVENTS);
 				}
 			} catch (Exception exp) {
 				logger.error(HIMGraphMessageConstant.EDGE_ALREADY_EXISTS);
 			}
 
 			edge.setEdge(e);
-			if (area != null)
-				edge.setArea(area);
-			if (null != loc.getProperty(HIMGraphConstant.CID))
-				edge.setCid(loc.getProperty(HIMGraphConstant.CID).toString());
 			if (null != city)
 				edge.setCity(city);
 			if (null != loc.getProperty(HIMGraphConstant.COUNTRY))
@@ -151,25 +142,13 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			edge.setDoj(new java.util.Date());
 			if (null != tags)
 				edge.setEtags(tags);
-			if (null != serviceName)
-				edge.setName(serviceName);
+			if (null != eventName)
+				edge.setName(eventName);
 			if (null != pincode)
 				edge.setPincode(pincode);
-			if (null != state)
-				edge.setState(state);
-			if (null != followers)
-				edge.setFollowers(followers);
-			if (null != rating)
-				edge.setRating(rating);
-			edge.setLabel(SchemaFactory.E_BUSINESS_LOC_EDGE);
-			if (null != status)
-				edge.setStatus(status);
-			if (null != likes)
-				edge.setLikes(likes);
-			if (null != address)
-				edge.setHouse(address);
-			if (null != bType)
-				edge.setBtype(bType);
+			edge.setLabel(SchemaFactory.E_EVENTS);
+			if (null != eventType)
+				edge.setBtype(eventType);
 			if (null != lat && null != lon) {
 				if (Geoshape.isValidCoordinate(lat, lon))
 					edge.setLoc(Geoshape.point(lat, lon));
@@ -192,10 +171,11 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			@RexsterContext SecurityContext securityContext,
 			@RexsterContext Graph g,
 			@RexsterContext HttpServletRequest request,
-			@ExtensionRequestParameter(name = "serviceId", description = "service id") String serviceId,
-			@ExtensionRequestParameter(name = "serviceName", description = "service name") String serviceName,
-			@ExtensionRequestParameter(name = "btype", description = "business type") String bType,
-			@ExtensionRequestParameter(name = "bcategory", description = "business category") String bCategory,
+			@ExtensionRequestParameter(name = "eventCode", description = "event Code") String eventCode,
+			@ExtensionRequestParameter(name = "himId", description = "him Id") String himId,
+			@ExtensionRequestParameter(name = "eventName", description = "event name") String eventName,
+			@ExtensionRequestParameter(name = "eventType", description = "event type") String eventType,
+			@ExtensionRequestParameter(name = "eventCategory", description = "event category") String eventCategory,
 			@ExtensionRequestParameter(name = "status", description = "status") Integer status,
 			@ExtensionRequestParameter(name = "rating", description = "rating") Float rating,
 			@ExtensionRequestParameter(name = "followers", description = "followers") Long followers,
@@ -208,14 +188,14 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 		 * securityContext); if (response != null) { return response.prepare();
 		 * } else { response = new ControllerResponse(); }
 		 */
-		if (null == serviceId) {
+		if (null == eventCode) {
 			response.setMessage(HIMGraphMessageConstant.MISSING_SERVICE);
 			response.setStatus(BAD_INPUT);
 			logger.error(HIMGraphMessageConstant.MISSING_SERVICE);
 			return response.prepare();
 		}
 		Iterator<Vertex> meIter = graph.getVertices(HIMGraphConstant.ID,
-				serviceId).iterator();
+				eventCode).iterator();
 		Vertex meV = meIter.next();
 		if (meV == null) {
 			response.setMessage(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
@@ -224,18 +204,14 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			return response.prepare();
 		}
 
-		if (null != serviceName)
-			meV.setProperty(HIMGraphConstant.NAME, serviceName);
+		if (null != eventName)
+			meV.setProperty(HIMGraphConstant.NAME, eventName);
 		if (null != tags)
 			meV.setProperty(HIMGraphConstant.TAGS, tags);
-		if (null != bType)
-			meV.setProperty(HIMGraphConstant.BTYPE, bType);
-		if (null != bCategory)
-			meV.setProperty(HIMGraphConstant.BCATEGORY, bCategory);
-		if (null != serviceId)
-			meV.setProperty(HIMGraphConstant.SERVICE_ID, serviceId);
-		if (null != serviceName)
-			meV.setProperty(HIMGraphConstant.SERVICE_NAME, serviceName);
+		if (null != eventType)
+			meV.setProperty(HIMGraphConstant.EVENT_TYPE, eventType);
+		if (null != eventCategory)
+			meV.setProperty(HIMGraphConstant.EVENT_CATEGORY, eventCategory);
 		if (null != status)
 			meV.setProperty(HIMGraphConstant.STATUS, status);
 		meV.setProperty(HIMGraphConstant.DATE_OF_JOINING, new Date());
@@ -249,9 +225,8 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 		try {
 			List vinfo = new ArrayList();
 			edge = new SGeoLocationEdge();
-			Iterator<Vertex> es = graph.query()
-					.has(HIMGraphConstant.ID, serviceId).limit(1).vertices()
-					.iterator();
+			Iterator<Vertex> es = graph.query().has(HIMGraphConstant.ID, himId)
+					.limit(1).vertices().iterator();
 			Vertex loc = null;
 			if (es.hasNext()) {
 				loc = es.next();
@@ -267,9 +242,8 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			TitanEdge e = null;
 			try {
 				GremlinPipeline pipe = new GremlinPipeline();
-				Iterator iter = pipe.start(meV)
-						.bothE(SchemaFactory.E_BUSINESS_LOC_EDGE).as("e")
-						.bothV().retain(vinfo).back("e").iterator();
+				Iterator iter = pipe.start(meV).bothE(SchemaFactory.E_EVENTS)
+						.as("e").bothV().retain(vinfo).back("e").iterator();
 				if (iter.hasNext()) {
 					e = (TitanEdge) iter.next();
 				}
@@ -288,8 +262,8 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			edge.setEdge(e);
 			if (null != tags)
 				edge.setEtags(tags);
-			if (null != serviceName)
-				edge.setName(serviceName);
+			if (null != eventName)
+				edge.setName(eventName);
 			if (null != followers)
 				edge.setFollowers(followers);
 			if (null != rating)
@@ -298,8 +272,8 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 				edge.setStatus(status);
 			if (null != likes)
 				edge.setLikes(likes);
-			if (null != bType)
-				edge.setBtype(bType);
+			if (null != eventType)
+				edge.setBtype(eventType);
 			edge.prepare();
 			response.setDbResult(e);
 		} catch (Exception e) {

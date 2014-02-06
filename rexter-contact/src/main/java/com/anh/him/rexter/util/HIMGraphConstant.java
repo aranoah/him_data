@@ -2,6 +2,9 @@ package com.anh.him.rexter.util;
 
 public class HIMGraphConstant {
 
+	/*
+	 * for business search and creation
+	 */
 	public static String ID = "__id"; // ID
 	public static String PINCODE = "pincode"; // PINCODE
 	public static String BTYPE = "btype"; // BUSINESS TYPE
@@ -23,4 +26,14 @@ public class HIMGraphConstant {
 	public static String RATING = "rating"; // RATING
 	public static String FOLLOWERS = "followers"; // FOLLOWERS
 	public static String LIKES = "likes"; // LIKES
+
+	/*
+	 * for Events creation or update
+	 */
+	public static String EVENT_CODE = "eventCode"; // EVENT CODE
+	public static String EVENT_TYPE = "eventType"; // EVENT TYPE
+	public static String EVENT_CATEGORY = "eventCategory"; // EVENT CATEGORY	
+	public static String STOREID = "storeId"; // STOREID
+	public static String HIM_ID = "himId";
+	
 }

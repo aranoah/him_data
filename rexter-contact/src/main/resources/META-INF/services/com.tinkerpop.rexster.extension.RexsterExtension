@@ -1,3 +1,4 @@
 com.anh.him.rexter.ContactGraphService
 com.anh.him.rexter.BusinessGraphService
 com.anh.him.rexter.SearchGraphService
+com.anh.him.rexter.EventGraphService

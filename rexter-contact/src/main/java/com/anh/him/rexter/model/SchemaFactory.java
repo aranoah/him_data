@@ -9,9 +9,7 @@ import com.thinkaurelius.titan.core.Titan;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.TitanKey;
 import com.thinkaurelius.titan.core.attribute.Geoshape;
-import com.thinkaurelius.titan.graphdb.types.StandardKeyMaker;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
 
 public class SchemaFactory {
@@ -21,6 +19,7 @@ public class SchemaFactory {
 	public static final String E_LOCATON_EDGE = "locatedIn";
 	public static final String E_BUSINESS_LOC_EDGE = "linkAt";
 	private static final String E_FEEDS = "feed";
+	public static final String E_EVENTS = "hosts";
 
 	// public static final String E_BUSINESS_TYPE_EDGE="linkAt";
 
@@ -85,6 +84,8 @@ public class SchemaFactory {
 
 			graph.makeLabel(E_LOCATON_EDGE).signature(label, profile, pincode)
 					.sortKey(rating, likes, followers).oneToMany().make();
+			graph.makeLabel(E_EVENTS).signature(label, pincode)
+					.sortKey(rating, likes, followers).oneToMany().make();
 
 			graph.makeLabel(E_FRIEND_OF).signature(label, fndship).manyToMany()
 					.make();
@@ -106,12 +107,11 @@ public class SchemaFactory {
 					.make();
 			TitanKey __cid = graph.makeKey("__cid").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Vertex.class).make();
-           //SEvent node
+			// SEvent node
 			graph.makeKey("sdate").dataType(Date.class).make();
 			graph.makeKey("edate").dataType(Date.class).make();
-			
-			
-	  		graph.commit();
+
+			graph.commit();
 		}
 			break;
 		default:
