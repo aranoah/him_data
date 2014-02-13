@@ -30,6 +30,8 @@ public class SGeoLocationEdge {
 	private String cid;
 	private String house;
 	private String btype;
+	private String category;
+	private String serviceId;
 
 	/**
 	 * 
@@ -391,6 +393,22 @@ public class SGeoLocationEdge {
 	 */
 	public String getCid() {
 		return cid;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public String getServiceId() {
+		return serviceId;
+	}
+
+	public void setServiceId(String serviceId) {
+		this.serviceId = serviceId;
 	}
 
 }

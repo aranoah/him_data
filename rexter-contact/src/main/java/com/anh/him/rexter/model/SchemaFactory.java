@@ -33,7 +33,17 @@ public class SchemaFactory {
 			graph.makeKey("type").dataType(String.class).make();
 			graph.makeKey("photoUrl").dataType(String.class).make();
 			graph.makeKey("emailId").dataType(String.class).make();
-			graph.makeKey("name").dataType(String.class).make();
+			
+			TitanKey name = graph
+					.makeKey("name")
+					.dataType(String.class)
+					.indexed(
+							AbstractExtension.INDEX_NAME,
+							Edge.class,
+							new Parameter[] { Parameter.of(
+									Mapping.MAPPING_PREFIX, Mapping.TEXT) })
+					.make();
+			
 			graph.makeKey("desc").dataType(String.class).make();
 			graph.makeKey("status").dataType(Integer.class).make();
 			graph.makeKey("doj").dataType(Date.class).make();
@@ -62,7 +72,10 @@ public class SchemaFactory {
 			// this should be identify what kind of edge this is //label
 			TitanKey btype = graph.makeKey("btype").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
-			TitanKey cid = graph.makeKey("oid").dataType(String.class)
+			TitanKey serviceId = graph.makeKey("oid").dataType(String.class)
+					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
+			TitanKey category = graph.makeKey("category")
+					.dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
 			TitanKey label = graph.makeKey("hlabel").dataType(String.class)
 					.indexed(AbstractExtension.INDEX_NAME, Edge.class).make();
@@ -79,8 +92,8 @@ public class SchemaFactory {
 
 			// label declaration
 			graph.makeLabel(E_BUSINESS_LOC_EDGE)
-					.signature(label, btype, pincode)
-					.sortKey(rating, likes, followers).oneToMany().make();
+					.signature(label, btype, pincode, category, name, serviceId)
+					.sortKey(rating, likes, followers).manyToMany().make();
 
 			graph.makeLabel(E_LOCATON_EDGE).signature(label, profile, pincode)
 					.sortKey(rating, likes, followers).oneToMany().make();
@@ -92,6 +105,7 @@ public class SchemaFactory {
 			graph.makeLabel(E_FOLLOWS).signature(label).manyToMany().make();
 			graph.makeLabel(E_FEEDS).signature(label)
 					.sortKey(rating, likes, followers).manyToMany().make();
+
 			// Location or visiting place
 			graph.makeKey("caddress").dataType(String.class).make();
 			graph.makeKey("carea").dataType(String.class).make();

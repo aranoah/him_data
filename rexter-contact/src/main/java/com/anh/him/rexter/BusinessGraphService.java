@@ -50,7 +50,7 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			@ExtensionRequestParameter(name = "state", description = "state") String state,
 			@ExtensionRequestParameter(name = "city", description = "city") String city,
 			@ExtensionRequestParameter(name = "area", description = "area") String area,
-			@ExtensionRequestParameter(name = "doj", description = "doj") Integer doj,
+			@ExtensionRequestParameter(name = "doj", description = "doj") String doj,
 			@ExtensionRequestParameter(name = "status", description = "status") Integer status,
 			@ExtensionRequestParameter(name = "rating", description = "rating") Float rating,
 			@ExtensionRequestParameter(name = "followers", description = "followers") Long followers,
@@ -156,6 +156,7 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 				edge.setName(serviceName);
 			if (null != pincode)
 				edge.setPincode(pincode);
+
 			if (null != state)
 				edge.setState(state);
 			if (null != followers)
@@ -287,6 +288,10 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 			}
 
 			edge.setEdge(e);
+			if (null != bCategory)
+				edge.setCategory(bCategory);
+			if (null != serviceId)
+				edge.setCategory(serviceId);
 			if (null != tags)
 				edge.setEtags(tags);
 			if (null != serviceName)
@@ -312,5 +317,4 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 		}
 		return response.prepare();
 	}
-
 }
