@@ -317,4 +317,81 @@ public class BusinessGraphService extends AbstractRexsterExtension implements
 		}
 		return response.prepare();
 	}
+
+	@ExtensionDefinition(extensionPoint = ExtensionPoint.GRAPH, method = HttpMethod.POST, path = "associateBusiness", produces = "application/json")
+	@ExtensionDescriptor(description = "register or update business")
+	public ExtensionResponse associateBusiness(
+			@RexsterContext SecurityContext securityContext,
+			@RexsterContext Graph g,
+			@RexsterContext HttpServletRequest request,
+			@ExtensionRequestParameter(name = "fromId", description = "from Business Id") String fromId,
+			@ExtensionRequestParameter(name = "toId", description = "toBusiness Id") Long toId,
+			@ExtensionRequestParameter(name = "relation", description = "relation") String relation,
+			@ExtensionRequestParameter(name = "tags", description = "tags") String tags) {
+		ControllerResponse response = new ControllerResponse();
+		TitanGraph graph = (TitanGraph) g;
+		/*
+		 * response = HimAuthenticationFilter.isAdminUser(null,
+		 * securityContext); if (response != null) { return response.prepare();
+		 * } else { response = new ControllerResponse(); }
+		 */
+		if (null == toId || null == fromId) {
+			response.setMessage(HIMGraphMessageConstant.MISSING_SERVICE);
+			response.setStatus(BAD_INPUT);
+			logger.error(HIMGraphMessageConstant.MISSING_SERVICE);
+			return response.prepare();
+		}
+		Iterator<Vertex> meIter = graph
+				.getVertices(HIMGraphConstant.ID, fromId).iterator();
+		Vertex meV = null;
+		if (!meIter.hasNext()) {
+			response.setMessage(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+			response.setStatus(BAD_INPUT);
+			logger.error(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+			return response.prepare();
+		}
+		meV = meIter.next();
+
+		meIter = graph.getVertices(HIMGraphConstant.ID, toId).iterator();
+		Vertex loc = null;
+		if (!meIter.hasNext()) {
+			response.setMessage(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+			response.setStatus(BAD_INPUT);
+			logger.error(HIMGraphMessageConstant.CIRCLE_NOT_EXIST);
+			return response.prepare();
+		}
+		loc = meIter.next();
+
+		SGeoLocationEdge edge = null;
+		try {
+			edge = new SGeoLocationEdge();
+
+			TitanEdge e = null;
+			try {
+				e = (TitanEdge) graph.addEdge(null, meV, loc,
+						SchemaFactory.E_BUSINESS_ASC_EDGE);
+			} catch (Exception exp) {
+				logger.error(HIMGraphMessageConstant.EDGE_ALREADY_EXISTS);
+				response.setMessage(HIMGraphMessageConstant.EDGE_ALREADY_EXISTS);
+				response.setStatus(BAD_INPUT);
+				return response.prepare();
+			}
+			edge.setEdge(e);
+			edge.setDoj(new java.util.Date());
+			if (null != tags)
+				edge.setEtags(tags);
+			if (null != relation)
+				edge.setName(relation);
+			edge.setLabel(SchemaFactory.E_BUSINESS_ASC_EDGE);
+			edge.prepare();
+			response.setDbResult(e);
+		} catch (Exception e) {
+			logger.error(HIMGraphMessageConstant.UNKNOWN_ERROR + " : "
+					+ e.getMessage());
+			response.setMessage(HIMGraphMessageConstant.UNKNOWN_ERROR);
+			response.setStatus(BAD_INPUT);
+			return response.prepare();
+		}
+		return response.prepare();
+	}
 }

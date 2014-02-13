@@ -20,6 +20,7 @@ public class SchemaFactory {
 	public static final String E_BUSINESS_LOC_EDGE = "linkAt";
 	private static final String E_FEEDS = "feed";
 	public static final String E_EVENTS = "hosts";
+	public static final String E_BUSINESS_ASC_EDGE = "business-link";
 
 	// public static final String E_BUSINESS_TYPE_EDGE="linkAt";
 
@@ -33,7 +34,7 @@ public class SchemaFactory {
 			graph.makeKey("type").dataType(String.class).make();
 			graph.makeKey("photoUrl").dataType(String.class).make();
 			graph.makeKey("emailId").dataType(String.class).make();
-			
+
 			TitanKey name = graph
 					.makeKey("name")
 					.dataType(String.class)
@@ -43,7 +44,7 @@ public class SchemaFactory {
 							new Parameter[] { Parameter.of(
 									Mapping.MAPPING_PREFIX, Mapping.TEXT) })
 					.make();
-			
+
 			graph.makeKey("desc").dataType(String.class).make();
 			graph.makeKey("status").dataType(Integer.class).make();
 			graph.makeKey("doj").dataType(Date.class).make();
@@ -93,6 +94,10 @@ public class SchemaFactory {
 			// label declaration
 			graph.makeLabel(E_BUSINESS_LOC_EDGE)
 					.signature(label, btype, pincode, category, name, serviceId)
+					.sortKey(rating, likes, followers).manyToMany().make();
+
+			graph.makeLabel(E_BUSINESS_ASC_EDGE)
+					.signature(label, btype, category, name)
 					.sortKey(rating, likes, followers).manyToMany().make();
 
 			graph.makeLabel(E_LOCATON_EDGE).signature(label, profile, pincode)
